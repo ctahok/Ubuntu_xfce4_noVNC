@@ -49,7 +49,7 @@ A Docker image providing a full **XFCE4 desktop with audio** accessible through 
 ## Build
 
 ```sh
-git clone <this-repo>
+git clone https://github.com/ctahok/Ubuntu_xfce4_noVNC.git
 docker build -t ubuntu-xfce4 ubuntu_xfce4_novnc/
 ```
 
