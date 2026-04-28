@@ -50,7 +50,7 @@ A Docker image providing a full **XFCE4 desktop with audio** accessible through 
 
 ```sh
 git clone https://github.com/ctahok/Ubuntu_xfce4_noVNC.git
-docker build -t ubuntu-xfce4 ubuntu_xfce4_novnc/
+sudo docker build -t ubuntu-xfce4 Ubuntu_xfce4_noVNC/
 ```
 
 The build takes a few minutes the first time (downloads XFCE4, Firefox, noVNC, and Node packages).
