@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-LABEL maintainer="IJ <ij@klaud.uk>"
+LABEL maintainer="Don <novaspirit@novaspirit.com>"
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -48,9 +48,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Stage 3: create user + fetch noVNC ────────────────────────────────────────
-RUN useradd -m -s /bin/bash -d /home/ubuntu ubuntu \
-    && echo "ubuntu:ubuntu" | chpasswd \
-    && echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
+RUN useradd -m -s /bin/bash -d /home/yubuntu yubuntu \
+    && echo "yubuntu:yubuntu" | chpasswd \
+    && echo 'yubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
     && git clone https://github.com/novnc/noVNC /opt/noVNC \
     && git clone https://github.com/novnc/websockify /opt/noVNC/utils/websockify \
     && wget https://raw.githubusercontent.com/novaspirit/Alpine_xfce4_noVNC/dev/script.js    -O /opt/noVNC/script.js \
@@ -62,15 +62,15 @@ RUN useradd -m -s /bin/bash -d /home/ubuntu ubuntu \
 RUN npm install --prefix /opt/noVNC ws
 RUN npm install --prefix /opt/noVNC audify
 
-# ── Stage 5: configure VNC as the ubuntu user ─────────────────────────────────
-USER ubuntu
-WORKDIR /home/ubuntu
+# ── Stage 5: configure VNC as the yubuntu user ─────────────────────────────────
+USER yubuntu
+WORKDIR /home/yubuntu
 
-RUN mkdir -p /home/ubuntu/.vnc \
-    && echo "-SecurityTypes=none" > /home/ubuntu/.vnc/config \
-    && printf '#!/bin/bash\nstartxfce4 &\n' > /home/ubuntu/.vnc/xstartup \
-    && chmod +x /home/ubuntu/.vnc/xstartup \
-    && printf "ubuntu\nubuntu\nn\n" | vncpasswd
+RUN mkdir -p /home/yubuntu/.vnc \
+    && echo "-SecurityTypes=none" > /home/yubuntu/.vnc/config \
+    && printf '#!/bin/bash\nstartxfce4 &\n' > /home/yubuntu/.vnc/xstartup \
+    && chmod +x /home/yubuntu/.vnc/xstartup \
+    && printf "yubuntu\nyubuntu\nn\n" | /usr/bin/vncpasswd
 
 # ── Stage 6: write the entrypoint script ──────────────────────────────────────
 USER root
@@ -85,6 +85,6 @@ sleep 1\n\
 > /entry.sh \
 && chmod +x /entry.sh
 
-USER ubuntu
+USER yubuntu
 
 ENTRYPOINT [ "/bin/bash", "/entry.sh" ]
