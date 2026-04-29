@@ -58,10 +58,9 @@ RUN useradd -m -s /bin/bash -d /home/yubuntu yubuntu \
     && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/vnc.html     -O /opt/noVNC/vnc.html \
     && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/pcm-player.js -O /opt/noVNC/pcm-player.js
 
-# ── Stage 4: update npm, then install Node.js dependencies ────────────────────
+# ── Stage 4: install Node.js dependencies ─────────────────────────────────────
 # --loglevel=error  hides deprecation/warn noise from transitive packages
 # --no-fund --no-audit  suppress advisory and funding messages
-RUN npm install -g npm@latest --loglevel=error --no-fund
 RUN npm install --prefix /opt/noVNC ws     --loglevel=error --no-fund --no-audit
 RUN npm install --prefix /opt/noVNC audify --loglevel=error --no-fund --no-audit
 
