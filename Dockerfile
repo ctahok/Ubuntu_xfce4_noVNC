@@ -13,8 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Node.js 18 LTS via NodeSource (Ubuntu 22.04 ships v12 by default, too old for audify)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+# Node.js 22 LTS via NodeSource (audify's node-abi dependency requires >=22.12.0)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 
 # Firefox: Ubuntu 22.04 ships firefox as a Snap which cannot run inside Docker.
 # The Mozilla PPA provides a proper .deb build.
@@ -53,10 +53,10 @@ RUN useradd -m -s /bin/bash -d /home/yubuntu yubuntu \
     && echo 'yubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
     && git clone https://github.com/novnc/noVNC /opt/noVNC \
     && git clone https://github.com/novnc/websockify /opt/noVNC/utils/websockify \
-    && wget https://raw.githubusercontent.com/novaspirit/Alpine_xfce4_noVNC/dev/script.js    -O /opt/noVNC/script.js \
-    && wget https://raw.githubusercontent.com/novaspirit/Alpine_xfce4_noVNC/dev/audify.js    -O /opt/noVNC/audify.js \
-    && wget https://raw.githubusercontent.com/novaspirit/Alpine_xfce4_noVNC/dev/vnc.html     -O /opt/noVNC/vnc.html \
-    && wget https://raw.githubusercontent.com/novaspirit/Alpine_xfce4_noVNC/dev/pcm-player.js -O /opt/noVNC/pcm-player.js
+    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/main/script.js    -O /opt/noVNC/script.js \
+    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/main/audify.js    -O /opt/noVNC/audify.js \
+    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/main/vnc.html     -O /opt/noVNC/vnc.html \
+    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/main/pcm-player.js -O /opt/noVNC/pcm-player.js
 
 # ── Stage 4: install Node.js dependencies ─────────────────────────────────────
 RUN npm install --prefix /opt/noVNC ws
@@ -67,10 +67,10 @@ USER yubuntu
 WORKDIR /home/yubuntu
 
 RUN mkdir -p /home/yubuntu/.vnc \
-    && echo "-SecurityTypes=none" > /home/yubuntu/.vnc/config \
     && printf '#!/bin/bash\nstartxfce4 &\n' > /home/yubuntu/.vnc/xstartup \
     && chmod +x /home/yubuntu/.vnc/xstartup \
-    && printf "yubuntu\nyubuntu\nn\n" | /usr/bin/vncpasswd
+    && printf "yubuntu\nyubuntu\nn\n" | /usr/bin/tigervncpasswd \
+    && echo "SecurityTypes=VncAuth" > /home/yubuntu/.vnc/config
 
 # ── Stage 6: write the entrypoint script ──────────────────────────────────────
 USER root
