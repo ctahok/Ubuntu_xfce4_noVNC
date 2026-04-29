@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         # Python
         python3 \
         # VNC server  (replaces Alpine's "tigervnc" metapackage)
-        tigervnc-standalone-server tigervnc-common \
+        tigervnc-standalone-server tigervnc-common tigervnc-tools \
         # Browser
         firefox \
         # Build tools  (replaces Alpine's "build-base" + "alsa-lib-dev")
