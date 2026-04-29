@@ -54,7 +54,7 @@ RUN useradd -m -s /bin/bash -d /home/yubuntu yubuntu \
     && git clone https://github.com/novnc/noVNC /opt/noVNC \
     && git clone https://github.com/novnc/websockify /opt/noVNC/utils/websockify \
     && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/script.js    -O /opt/noVNC/script.js \
-    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/audify.js    -O /opt/noVNC/audify.js \
+    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/audify.js    -O /opt/noVNC/audify.cjs \
     && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/vnc.html     -O /opt/noVNC/vnc.html \
     && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/pcm-player.js -O /opt/noVNC/pcm-player.js
 
@@ -69,7 +69,7 @@ USER yubuntu
 WORKDIR /home/yubuntu
 
 RUN mkdir -p /home/yubuntu/.vnc \
-    && printf '#!/bin/bash\nstartxfce4 &\n' > /home/yubuntu/.vnc/xstartup \
+    && printf '#!/bin/bash\nexport DISPLAY=:99\nstartxfce4\n' > /home/yubuntu/.vnc/xstartup \
     && chmod +x /home/yubuntu/.vnc/xstartup \
     && printf "yubuntu\nyubuntu\nn\n" | /usr/bin/tigervncpasswd \
     && echo "SecurityTypes=VncAuth" > /home/yubuntu/.vnc/config
@@ -78,11 +78,26 @@ RUN mkdir -p /home/yubuntu/.vnc \
 USER root
 
 RUN printf '#!/bin/bash\n\
+# Start D-Bus system daemon (required by PulseAudio inside Docker)\n\
+mkdir -p /run/dbus\n\
+dbus-daemon --system --fork 2>/dev/null || true\n\
+sleep 1\n\
+\n\
+# Start VNC server\n\
 /usr/bin/vncserver :99 2>&1 | sed "s/^/[Xtigervnc ] /" &\n\
+sleep 2\n\
+\n\
+# Start PulseAudio with a null sink (no real sound card in Docker)\n\
+DISPLAY=:99 /usr/bin/pulseaudio --daemonize=no --exit-idle-time=-1 \\\n\
+  --load="module-null-sink sink_name=virtual0" \\\n\
+  --load="module-native-protocol-unix" \\\n\
+  2>&1 | sed "s/^/[pulseaudio] /" &\n\
 sleep 1\n\
-/usr/bin/pulseaudio --daemonize=no 2>&1 | sed "s/^/[pulseaudio] /" &\n\
-sleep 1\n\
-/usr/bin/node /opt/noVNC/audify.js 2>&1 | sed "s/^/[audify    ] /" &\n\
+\n\
+# Start audify audio bridge\n\
+/usr/bin/node /opt/noVNC/audify.cjs 2>&1 | sed "s/^/[audify    ] /" &\n\
+\n\
+# Start noVNC proxy (blocks, keeping the container alive)\n\
 /opt/noVNC/utils/novnc_proxy --vnc localhost:5999 2>&1 | sed "s/^/[noVNC     ] /"\n' \
 > /entry.sh \
 && chmod +x /entry.sh
