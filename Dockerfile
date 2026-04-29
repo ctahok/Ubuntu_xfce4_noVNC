@@ -44,8 +44,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         # Node.js (installed from NodeSource repo above)
         nodejs \
         # Extras needed for a stable XFCE4 session inside Docker
-        dbus-x11 x11-xserver-utils \
-    && rm -rf /var/lib/apt/lists/*
+        dbus dbus-x11 x11-xserver-utils \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /run/dbus && chmod 755 /run/dbus
 
 # ── Stage 3: create user + fetch noVNC ────────────────────────────────────────
 RUN useradd -m -s /bin/bash -d /home/yubuntu yubuntu \
@@ -69,7 +70,7 @@ USER yubuntu
 WORKDIR /home/yubuntu
 
 RUN mkdir -p /home/yubuntu/.vnc \
-    && printf '#!/bin/bash\nexport DISPLAY=:99\nstartxfce4\n' > /home/yubuntu/.vnc/xstartup \
+    && printf '#!/bin/bash\nexport DISPLAY=:99\neval $(dbus-launch --sh-syntax 2>/dev/null) || true\nexec startxfce4\n' > /home/yubuntu/.vnc/xstartup \
     && chmod +x /home/yubuntu/.vnc/xstartup \
     && printf "yubuntu\nyubuntu\nn\n" | /usr/bin/tigervncpasswd \
     && echo "SecurityTypes=VncAuth" > /home/yubuntu/.vnc/config
@@ -79,19 +80,19 @@ USER root
 
 RUN printf '#!/bin/bash\n\
 # Start D-Bus system daemon (required by PulseAudio inside Docker)\n\
-mkdir -p /run/dbus\n\
 dbus-daemon --system --fork 2>/dev/null || true\n\
 sleep 1\n\
 \n\
 # Start VNC server\n\
 /usr/bin/vncserver :99 2>&1 | sed "s/^/[Xtigervnc ] /" &\n\
-sleep 2\n\
+sleep 3\n\
 \n\
 # Start PulseAudio with a null sink (no real sound card in Docker)\n\
+# Filter D-Bus warnings - they are non-fatal, audio still works\n\
 DISPLAY=:99 /usr/bin/pulseaudio --daemonize=no --exit-idle-time=-1 \\\n\
   --load="module-null-sink sink_name=virtual0" \\\n\
   --load="module-native-protocol-unix" \\\n\
-  2>&1 | sed "s/^/[pulseaudio] /" &\n\
+  2>&1 | grep -v -E "dbus|D-Bus|system bus|cookie|authkey" | sed "s/^/[pulseaudio] /" &\n\
 sleep 1\n\
 \n\
 # Start audify audio bridge\n\
