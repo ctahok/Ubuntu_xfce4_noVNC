@@ -53,10 +53,10 @@ RUN useradd -m -s /bin/bash -d /home/yubuntu yubuntu \
     && echo 'yubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
     && git clone https://github.com/novnc/noVNC /opt/noVNC \
     && git clone https://github.com/novnc/websockify /opt/noVNC/utils/websockify \
-    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/main/script.js    -O /opt/noVNC/script.js \
-    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/main/audify.js    -O /opt/noVNC/audify.js \
-    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/main/vnc.html     -O /opt/noVNC/vnc.html \
-    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/main/pcm-player.js -O /opt/noVNC/pcm-player.js
+    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/script.js    -O /opt/noVNC/script.js \
+    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/audify.js    -O /opt/noVNC/audify.js \
+    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/vnc.html     -O /opt/noVNC/vnc.html \
+    && wget https://raw.githubusercontent.com/ctahok/Ubuntu_xfce4_noVNC/latest/pcm-player.js -O /opt/noVNC/pcm-player.js
 
 # ── Stage 4: install Node.js dependencies ─────────────────────────────────────
 RUN npm install --prefix /opt/noVNC ws
