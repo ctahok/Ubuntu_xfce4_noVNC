@@ -22,6 +22,10 @@ RUN add-apt-repository -y ppa:mozillateam/ppa \
     && printf 'Package: firefox*\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 501\n' \
        > /etc/apt/preferences.d/mozillateamppa
 
+# Newer libstdc++6 (GLIBCXX_3.4.32) required by audify native module.
+# Ubuntu 22.04 only ships up to 3.4.30; the toolchain PPA provides GCC 13.
+RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
 # ── Stage 2: install all packages ─────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
         sudo git wget \
@@ -45,6 +49,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         nodejs \
         # Extras needed for a stable XFCE4 session inside Docker
         dbus dbus-x11 x11-xserver-utils \
+        # Newer libstdc++ required by audify native module (GLIBCXX_3.4.32)
+        libstdc++6 \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /run/dbus && chmod 755 /run/dbus
 
